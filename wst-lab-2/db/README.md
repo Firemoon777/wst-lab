@@ -20,6 +20,13 @@ create  table cats (
 );
 ```
 
+Последовательность:
+```postgresql
+create sequence cat_id_seq
+increment 1
+start 5;
+```
+
 Тестовые данные:
 ```postgresql
 insert into cats values (1, 'Cat', 5, 'Haustier', 3000);

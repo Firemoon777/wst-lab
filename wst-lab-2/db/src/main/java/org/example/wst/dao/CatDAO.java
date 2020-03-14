@@ -46,9 +46,38 @@ public class CatDAO {
 
     }
 
-    public List<Cat> filter(Integer id,  String name, Integer age, String breed, Integer weight) throws SQLException {
+    public Integer create(String name, Integer age, String breed, Integer weight) {
+        try {
+            connection.setAutoCommit(false);
+            Integer newId;
+            try (Statement idStatement = connection.createStatement()) {
+                idStatement.execute("SELECT nextval('cat_id_seq') nextval");
+                try (ResultSet rs = idStatement.getResultSet()) {
+                    rs.next();
+                    newId = rs.getInt("nextval");
+                }
+            }
+            try (PreparedStatement stmnt = connection.prepareStatement("INSERT INTO cats(id, name,  age, breed, weight) VALUES (?, ?, ?, ?, ?)")) {
+                stmnt.setInt(1, newId);
+                stmnt.setString(2, name);
+                stmnt.setInt(3, age);
+                stmnt.setString(4, breed);
+                stmnt.setInt(5, weight);
+                int count = stmnt.executeUpdate();
+                if (count == 0) {
+                    throw new RuntimeException("Could not execute query");
+                }
+            }
+            connection.commit();
+            connection.setAutoCommit(true);
+            return newId;
+        } catch (SQLException ex) {
+            Logger.getLogger(CatDAO.class.getName()).log(Level.SEVERE, null, ex);
+            return -1;
+        }
+    }
 
-//        Logger.getLogger(SimplePostgresSQLDAO.class.getName()).log(Level.SEVERE, name+city+line+type);
+    public List<Cat> read(Integer id, String name, Integer age, String breed, Integer weight) throws SQLException {
 
         if (Stream.of(id, name, age, breed, weight).allMatch(Objects::isNull)) {
             return findAll();
@@ -63,7 +92,6 @@ public class CatDAO {
                 .condition(new Condition(WEIGHT_COLUMN, weight, Integer.class))
                 .buildPreparedStatementQuery();
 
-
         try {
             PreparedStatement ps = connection.prepareStatement(query.getQueryString());
             query.initPreparedStatement(ps);
@@ -73,7 +101,38 @@ public class CatDAO {
             Logger.getLogger(SimplePostgresSQLDAO.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
+    }
 
+    public int update(Integer id, String name, Integer age, String breed, Integer weight) {
+        try {
+            connection.setAutoCommit(true);
+            String updateStr = "UPDATE cats SET name = ?, age = ?, breed = ?, weight = ? WHERE id = ?";
+            try (PreparedStatement stmnt = connection.prepareStatement(updateStr)) {
+                stmnt.setString(1, name);
+                stmnt.setInt(2, age);
+                stmnt.setString(3, breed);
+                stmnt.setInt(4, weight);
+                stmnt.setInt(5, id);
+                int updated = stmnt.executeUpdate();
+                return updated;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CatDAO.class.getName()).log(Level.SEVERE, null, ex);
+            return -1;
+        }
+    }
+
+    public int delete(Integer id) {
+        try {
+            connection.setAutoCommit(true);
+            try (PreparedStatement ps = connection.prepareStatement("DELETE FROM cats WHERE id = ?")) {
+                ps.setInt(1, id);
+                return ps.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CatDAO.class.getName()).log(Level.SEVERE, null, ex);
+            return -1;
+        }
     }
 
 

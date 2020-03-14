@@ -26,18 +26,40 @@ public class CatWebService {
         return cats;
     }
 
-    @WebMethod(operationName = "filter")
-    public List<Cat> filter(@WebParam(name = "id")     @XmlElement(nillable = true) Integer id,
+    @WebMethod(operationName = "create")
+    public Integer create(@WebParam(name = "name")   @XmlElement(nillable = true) String  name,
+                          @WebParam(name = "age")    @XmlElement(nillable = true) Integer age,
+                          @WebParam(name = "breed")  @XmlElement(nillable = true) String  breed,
+                          @WebParam(name = "weight") @XmlElement(nillable = true) Integer weight) {
+        return catDAO.create(name, age, breed, weight);
+    }
+
+    @WebMethod(operationName = "read")
+    public List<Cat> read(@WebParam(name = "id")     @XmlElement(nillable = true) Integer id,
                             @WebParam(name = "name")   @XmlElement(nillable = true) String  name,
                             @WebParam(name = "age")    @XmlElement(nillable = true) Integer age,
                             @WebParam(name = "breed")  @XmlElement(nillable = true) String  breed,
                             @WebParam(name = "weight") @XmlElement(nillable = true) Integer weight) {
         try {
-            return catDAO.filter(id, name, age, breed, weight);
+            return catDAO.read(id, name, age, breed, weight);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @WebMethod(operationName = "update")
+    public Integer update(@WebParam(name = "id")     @XmlElement(nillable = true) Integer id,
+                          @WebParam(name = "name")   @XmlElement(nillable = true) String  name,
+                          @WebParam(name = "age")    @XmlElement(nillable = true) Integer age,
+                          @WebParam(name = "breed")  @XmlElement(nillable = true) String  breed,
+                          @WebParam(name = "weight") @XmlElement(nillable = true) Integer weight) {
+        return catDAO.update(id, name, age, breed, weight);
+    }
+
+    @WebMethod(operationName = "delete")
+    public Integer delete(@WebParam(name = "id")     @XmlElement(nillable = true) Integer id) {
+        return catDAO.delete(id);
     }
 
     public CatWebService(CatDAO catDAO) {

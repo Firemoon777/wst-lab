@@ -1,7 +1,5 @@
 package org.example.wst.client;
 
-import org.example.wst.client.CatWebService;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.InputMismatchException;
@@ -16,9 +14,11 @@ public class WebServiceClient {
         while (true) {
             System.out.println("");
             System.out.println("Выберите пункт:");
-            System.out.println("1. Вывести всех котов");
-            System.out.println("2. Поискать котов по критерию");
-            System.out.println("3. Выйти");
+            System.out.println("1. Создать");
+            System.out.println("2. Прочитать");
+            System.out.println("3. Изменить");
+            System.out.println("4. Удалить");
+            System.out.println("5. Выйти");
             System.out.println("");
             System.out.print("Выбор: ");
 
@@ -29,13 +29,22 @@ public class WebServiceClient {
                 continue;
             }
             switch (decision) {
-                case 1:
+                case 0:
                     showAll();
                     break;
+                case 1:
+                    create();
+                    break;
                 case 2:
-                    showFiltered();
+                    read();
                     break;
                 case 3:
+                    update();
+                    break;
+                case 4:
+                    delete();
+                    break;
+                case 5:
                     return;
                 default:
                     System.out.println("Неверный выбор");
@@ -92,7 +101,18 @@ public class WebServiceClient {
         return line;
     }
 
-    public static void showFiltered() {
+    public static void create() {
+        CatWebService catWebService = getPort();
+        System.out.println("Введите информацию о новом коте:");
+        String name = readStr("Имя");
+        Integer age = readInt("Возраст");
+        String breed = readStr("Порода");
+        Integer weight = readInt("Вес");
+        Integer id = catWebService.create(name, age, breed, weight);
+        System.out.println("Создан кот с id = " + id);
+    }
+
+    public static void read() {
         CatWebService catWebService = getPort();
         System.out.println("Уточните запрос:");
         Integer id = readInt("Идентификатор");
@@ -100,8 +120,25 @@ public class WebServiceClient {
         Integer age = readInt("Возраст");
         String breed = readStr("Порода");
         Integer weight = readInt("Вес");
-        List<Cat> cats = catWebService.filter(id, name, age, breed, weight);
+        List<Cat> cats = catWebService.read(id, name, age, breed, weight);
         printCats(cats);
+    }
+
+    public static void update() {
+        CatWebService catWebService = getPort();
+        System.out.println("Уточните запрос:");
+        Integer id = readInt("Идентификатор редактируемой записи");
+        String name = readStr("Имя");
+        Integer age = readInt("Возраст");
+        String breed = readStr("Порода");
+        Integer weight = readInt("Вес");
+        catWebService.update(id, name, age, breed, weight);
+    }
+
+    public static void delete() {
+        CatWebService catWebService = getPort();
+        Integer id = readInt("Идентификатор удалямой записи");
+        catWebService.delete(id);
     }
 
     public static void main(String[] args) {
