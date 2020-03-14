@@ -1,5 +1,8 @@
 package org.example.wst.entity;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Cat {
 
     private Integer id;

@@ -4,6 +4,8 @@ import org.example.wst.entity.Cat;
 import org.example.wst.query.BuildQuery;
 import org.example.wst.query.Query;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public class CatDAO {
+@XmlRootElement
+public class CatDAO implements Serializable {
     private final String TABLE_NAME = "cats";
     private final String ID_COLUMN = "id";
     private final String NAME_COLUMN = "name";
