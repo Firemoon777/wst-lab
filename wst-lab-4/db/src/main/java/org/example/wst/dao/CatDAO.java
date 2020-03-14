@@ -46,7 +46,7 @@ public class CatDAO {
 
     }
 
-    public List<Cat> filter(Integer id,  String name, Integer age, String breed, Integer weight) throws SQLException {
+    public List<Cat> read(Integer id,  String name, Integer age, String breed, Integer weight) throws SQLException {
 
 //        Logger.getLogger(SimplePostgresSQLDAO.class.getName()).log(Level.SEVERE, name+city+line+type);
 
