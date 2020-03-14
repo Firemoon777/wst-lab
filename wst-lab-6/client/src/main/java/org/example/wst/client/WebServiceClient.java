@@ -1,9 +1,6 @@
 package org.example.wst.client;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.*;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
@@ -127,10 +124,16 @@ public class WebServiceClient {
 
         Client client = new Client();
         WebResource resource = client.resource(URL);
-        String body = resource.accept(MediaType.TEXT_PLAIN_TYPE, MediaType.APPLICATION_JSON_TYPE)
-                .entity(cat, MediaType.APPLICATION_JSON_TYPE)
-                .post(String.class);
-        System.out.println("Cоздана запись с id = " + body);
+        try {
+            String body = resource.accept(MediaType.TEXT_PLAIN_TYPE, MediaType.APPLICATION_JSON_TYPE)
+                    .entity(cat, MediaType.APPLICATION_JSON_TYPE)
+                    .post(String.class);
+
+            Integer id = Integer.valueOf(body);
+            System.out.println("Создана запись с id = " + id);
+        } catch (UniformInterfaceException ex) {
+            System.out.println("Проверьте параметры");
+        }
     }
 
     public static void read() {
@@ -173,7 +176,7 @@ public class WebServiceClient {
                 .entity(cat, MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.TEXT_PLAIN_TYPE)
                 .put(String.class);
-        System.out.println("Обновлено");
+        System.out.println(updateResponse);
     }
 
     public static void delete() {
@@ -182,7 +185,7 @@ public class WebServiceClient {
         Client client = new Client();
         WebResource resource = client.resource(URL);
         String body = resource.path(String.valueOf(id)).accept(MediaType.TEXT_PLAIN_TYPE).delete(String.class);
-        System.out.println("Удалено");
+        System.out.println(body);
     }
 
     public static void main(String[] args) {
