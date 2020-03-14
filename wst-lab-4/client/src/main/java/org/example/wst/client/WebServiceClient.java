@@ -1,7 +1,12 @@
 package org.example.wst.client;
 
-import org.example.wst.client.CatWebService;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.GenericType;
+import com.sun.jersey.api.client.WebResource;
+import org.example.wst.entity.Cat;
 
+import javax.ws.rs.core.MediaType;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.InputMismatchException;
@@ -9,6 +14,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public class WebServiceClient {
+
+    private static final String URL = "http://localhost:8080/rest/cats";
 
     public static void menu() {
         Scanner in = new Scanner(System.in);
@@ -55,20 +62,17 @@ public class WebServiceClient {
         System.out.println("Всего: " + cats.size());
     }
 
-    public static CatWebService getPort() {
-        URL url = null;
-        try {
-            url = new URL("http://0.0.0.0:8080/app/CatWebService?wsdl");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        CatWebService_Service CatWebService = new CatWebService_Service(url);
-        return CatWebService.getCatWebServicePort();
-    }
-
     public static void showAll() {
-        CatWebService catWebService = getPort();
-        List<Cat> cats = catWebService.getCats();
+        Client client = new Client();
+        WebResource resource = client.resource(URL);
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
+        if (response.getStatus() != ClientResponse.Status.OK.getStatusCode()) {
+            throw new IllegalStateException("Request failed");
+        }
+        GenericType<List<Cat>> stations = new GenericType<List<Cat>>() {
+        };
+
+        List<Cat> cats = resource.accept(MediaType.APPLICATION_JSON).get(stations);
         printCats(cats);
     }
 
@@ -92,16 +96,37 @@ public class WebServiceClient {
         return line;
     }
 
+    private static WebResource setParamIfNotNull(WebResource resource, String paramName, Object value) {
+        if (value == null) {
+            return resource;
+        }
+        return resource.queryParam(paramName, value.toString());
+    }
+
     public static void showFiltered() {
-        CatWebService catWebService = getPort();
         System.out.println("Уточните запрос:");
         Integer id = readInt("Идентификатор");
         String name = readStr("Имя");
         Integer age = readInt("Возраст");
         String breed = readStr("Порода");
         Integer weight = readInt("Вес");
-        List<Cat> cats = catWebService.filter(id, name, age, breed, weight);
+        Client client = new Client();
+        WebResource resource = client.resource(URL);
+        resource = setParamIfNotNull(resource, "id", id);
+        resource = setParamIfNotNull(resource, "name", name);
+        resource = setParamIfNotNull(resource, "age", age);
+        resource = setParamIfNotNull(resource, "breed", breed);
+        resource = setParamIfNotNull(resource, "weight", weight);
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
+        if (response.getStatus() != ClientResponse.Status.OK.getStatusCode()) {
+            throw new IllegalStateException("Request failed");
+        }
+        GenericType<List<Cat>> stations = new GenericType<List<Cat>>() {
+        };
+
+        List<Cat> cats = resource.accept(MediaType.APPLICATION_JSON).get(stations);
         printCats(cats);
+
     }
 
     public static void main(String[] args) {

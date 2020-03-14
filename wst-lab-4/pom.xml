@@ -11,7 +11,7 @@
     <modules>
         <module>db</module>
         <module>standalone</module>
-<!--        <module>client</module>-->
+        <module>client</module>
 <!--        <module>enterprise</module>-->
     </modules>
 

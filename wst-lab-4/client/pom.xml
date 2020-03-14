@@ -19,6 +19,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.3</version>
                 <executions>
                     <execution>
                         <id>make-bundles</id>
@@ -34,9 +35,7 @@
                             <mainClass>org.example.wst.client.WebServiceClient</mainClass>
                         </manifest>
                     </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <descriptor>src/assembly/depmerge.xml</descriptor>
                 </configuration>
             </plugin>
         </plugins>
@@ -45,10 +44,22 @@
     <dependencies>
         <dependency>
             <groupId>org.example.wst-lab</groupId>
-            <artifactId>standalone</artifactId>
+            <artifactId>db</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <classifier>client</classifier>
-            <scope>compile</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>1.19.4</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>1.19.4</version>
         </dependency>
     </dependencies>
 
