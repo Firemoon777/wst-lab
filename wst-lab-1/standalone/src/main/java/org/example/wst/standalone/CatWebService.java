@@ -13,7 +13,7 @@ import org.example.wst.entity.Cat;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebService(serviceName = "CatService", targetNamespace = "http://0.0.0.0:8080/")
+@WebService(serviceName = "CatWebService", targetNamespace = "http://0.0.0.0:8080/app")
 public class CatWebService {
 
     @Inject

@@ -1,6 +1,6 @@
 package org.example.wst.client;
 
-import org.example.wst.client.CatService;
+import org.example.wst.client.CatWebService;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -58,12 +58,12 @@ public class WebServiceClient {
     public static CatWebService getPort() {
         URL url = null;
         try {
-            url = new URL("http://0.0.0.0:8080/app/CatService?wsdl");
+            url = new URL("http://0.0.0.0:8080/app/CatWebService?wsdl");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        CatService catService = new CatService(url);
-        return catService.getCatWebServicePort();
+        CatWebService_Service CatWebService = new CatWebService_Service(url);
+        return CatWebService.getCatWebServicePort();
     }
 
     public static void showAll() {

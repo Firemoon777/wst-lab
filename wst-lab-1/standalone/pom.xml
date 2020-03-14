@@ -70,7 +70,7 @@
                             <destDir>${project.build.directory}/client-classes</destDir>
                             <xnocompile>false</xnocompile>
                             <wsdlFiles>
-                                <wsdlFile>${project.build.directory}/generated-sources/wsdl/CatService.wsdl
+                                <wsdlFile>${project.build.directory}/generated-sources/wsdl/CatWebService.wsdl
                                 </wsdlFile>
                             </wsdlFiles>
                             <packageName>org.example.wst.client</packageName>

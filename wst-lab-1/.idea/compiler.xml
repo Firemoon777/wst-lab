@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="db" />
         <module name="client" />
+        <module name="enterprise" />
         <module name="standalone" />
       </profile>
     </annotationProcessing>

@@ -28,7 +28,6 @@ public class CatDAO {
 
     public CatDAO() {
         this.connection = ConnectionUtil.getConnection();
-
     }
 
     public List<Cat> findAll() throws SQLException {
