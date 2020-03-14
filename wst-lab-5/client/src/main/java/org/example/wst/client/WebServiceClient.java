@@ -26,9 +26,11 @@ public class WebServiceClient {
         while (true) {
             System.out.println("");
             System.out.println("Выберите пункт:");
-            System.out.println("1. Вывести всех котов");
-            System.out.println("2. Поискать котов по критерию");
-            System.out.println("3. Выйти");
+            System.out.println("1. Создать");
+            System.out.println("2. Прочитать");
+            System.out.println("3. Изменить");
+            System.out.println("4. Удалить");
+            System.out.println("5. Выйти");
             System.out.println("");
             System.out.print("Выбор: ");
 
@@ -39,13 +41,22 @@ public class WebServiceClient {
                 continue;
             }
             switch (decision) {
-                case 1:
+                case 0:
                     showAll();
                     break;
+                case 1:
+                    create();
+                    break;
                 case 2:
-                    showFiltered();
+                    read();
                     break;
                 case 3:
+                    update();
+                    break;
+                case 4:
+                    delete();
+                    break;
+                case 5:
                     return;
                 default:
                     System.out.println("Неверный выбор");
@@ -106,7 +117,23 @@ public class WebServiceClient {
         return resource.queryParam(paramName, value.toString());
     }
 
-    public static void showFiltered() {
+    public static void create() {
+        System.out.println("Уточните запрос:");
+        String name = readStr("Имя");
+        Integer age = readInt("Возраст");
+        String breed = readStr("Порода");
+        Integer weight = readInt("Вес");
+        Cat cat = new Cat(null, name, age,breed, weight);
+
+        Client client = new Client();
+        WebResource resource = client.resource(URL);
+        String body = resource.accept(MediaType.TEXT_PLAIN_TYPE, MediaType.APPLICATION_JSON_TYPE)
+                .entity(cat, MediaType.APPLICATION_JSON_TYPE)
+                .post(String.class);
+        System.out.println("Cоздана запись с id = " + body);
+    }
+
+    public static void read() {
         System.out.println("Уточните запрос:");
         Integer id = readInt("Идентификатор");
         String name = readStr("Имя");
@@ -129,7 +156,33 @@ public class WebServiceClient {
 
         List<Cat> cats = resource.accept(MediaType.APPLICATION_JSON).get(stations);
         printCats(cats);
+    }
 
+    public static void update() {
+        System.out.println("Уточните запрос:");
+        Integer id = readInt("Идентификатор");
+        String name = readStr("Имя");
+        Integer age = readInt("Возраст");
+        String breed = readStr("Порода");
+        Integer weight = readInt("Вес");
+        Client client = new Client();
+        WebResource resource = client.resource(URL);
+
+        Cat cat = new Cat(null, name, age,breed, weight);
+        String updateResponse = resource.path(String.valueOf(id))
+                .entity(cat, MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.TEXT_PLAIN_TYPE)
+                .put(String.class);
+        System.out.println("Обновлено");
+    }
+
+    public static void delete() {
+        System.out.println("Уточните запрос:");
+        Integer id = readInt("Идентификатор");
+        Client client = new Client();
+        WebResource resource = client.resource(URL);
+        String body = resource.path(String.valueOf(id)).accept(MediaType.TEXT_PLAIN_TYPE).delete(String.class);
+        System.out.println("Удалено");
     }
 
     public static void main(String[] args) {
