@@ -12,4 +12,4 @@ wget https://repo1.maven.org/maven2/org/postgresql/postgresql/9.2-1003-jdbc4/pos
 
 Из-за бага Glassfish этой версии редактируем Derby, а не создаём новый JDBC Connection Pool.
 
-При деплое указываем Context Root `/app`
+При деплое указываем Context Root `/rest`
