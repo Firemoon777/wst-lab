@@ -12,8 +12,5 @@
         <module name="standalone" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="enterprise" target="1.5" />
-    </bytecodeTargetLevel>
   </component>
 </project>
