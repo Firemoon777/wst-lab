@@ -30,7 +30,15 @@ public class CatWebService {
     public Integer create(@WebParam(name = "name")   @XmlElement(nillable = true) String  name,
                           @WebParam(name = "age")    @XmlElement(nillable = true) Integer age,
                           @WebParam(name = "breed")  @XmlElement(nillable = true) String  breed,
-                          @WebParam(name = "weight") @XmlElement(nillable = true) Integer weight) {
+                          @WebParam(name = "weight") @XmlElement(nillable = true) Integer weight) throws CatException {
+        if(age < 0) {
+            CatServiceFault catServiceFault = CatServiceFault.defaultInstance();
+            throw new CatException("Возраст не может быть меньше 0", catServiceFault);
+        }
+        if(weight < 0) {
+            CatServiceFault catServiceFault = CatServiceFault.defaultInstance();
+            throw new CatException("Вес не может быть меньше 0", catServiceFault);
+        }
         return catDAO.create(name, age, breed, weight);
     }
 
@@ -53,12 +61,36 @@ public class CatWebService {
                           @WebParam(name = "name")   @XmlElement(nillable = true) String  name,
                           @WebParam(name = "age")    @XmlElement(nillable = true) Integer age,
                           @WebParam(name = "breed")  @XmlElement(nillable = true) String  breed,
-                          @WebParam(name = "weight") @XmlElement(nillable = true) Integer weight) {
+                          @WebParam(name = "weight") @XmlElement(nillable = true) Integer weight) throws CatException {
+        try {
+            if (catDAO.read(id, null, null, null, null).size() == 0) {
+                CatServiceFault catServiceFault = CatServiceFault.defaultInstance();
+                throw new CatException("Нет объекта с таким id", catServiceFault);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if(age < 0) {
+            CatServiceFault catServiceFault = CatServiceFault.defaultInstance();
+            throw new CatException("Возраст не может быть меньше 0", catServiceFault);
+        }
+        if(weight < 0) {
+            CatServiceFault catServiceFault = CatServiceFault.defaultInstance();
+            throw new CatException("Вес не может быть меньше 0", catServiceFault);
+        }
         return catDAO.update(id, name, age, breed, weight);
     }
 
     @WebMethod(operationName = "delete")
-    public Integer delete(@WebParam(name = "id")     @XmlElement(nillable = true) Integer id) {
+    public Integer delete(@WebParam(name = "id")     @XmlElement(nillable = true) Integer id) throws CatException {
+        try {
+            if (catDAO.read(id, null, null, null, null).size() == 0) {
+                CatServiceFault catServiceFault = CatServiceFault.defaultInstance();
+                throw new CatException("Нет объекта с таким id", catServiceFault);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return catDAO.delete(id);
     }
 

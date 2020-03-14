@@ -108,8 +108,13 @@ public class WebServiceClient {
         Integer age = readInt("Возраст");
         String breed = readStr("Порода");
         Integer weight = readInt("Вес");
-        Integer id = catWebService.create(name, age, breed, weight);
-        System.out.println("Создан кот с id = " + id);
+        Integer id = null;
+        try {
+            id = catWebService.create(name, age, breed, weight);
+            System.out.println("Создан кот с id = " + id);
+        } catch (CatException e) {
+            System.out.println("Ошибка добавления: " + e.getMessage());
+        }
     }
 
     public static void read() {
@@ -132,13 +137,21 @@ public class WebServiceClient {
         Integer age = readInt("Возраст");
         String breed = readStr("Порода");
         Integer weight = readInt("Вес");
-        catWebService.update(id, name, age, breed, weight);
+        try {
+            catWebService.update(id, name, age, breed, weight);
+        } catch (CatException e) {
+            System.out.println("Ошибка редактирования: " + e.getMessage());
+        }
     }
 
     public static void delete() {
         CatWebService catWebService = getPort();
         Integer id = readInt("Идентификатор удалямой записи");
-        catWebService.delete(id);
+        try {
+            catWebService.delete(id);
+        } catch (CatException e) {
+            System.out.println("Ошибка удаления: " + e.getMessage());
+        }
     }
 
     public static void main(String[] args) {
