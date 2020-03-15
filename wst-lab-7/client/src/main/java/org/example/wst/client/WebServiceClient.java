@@ -2,13 +2,26 @@ package org.example.wst.client;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.juddi.api_v3.AccessPointType;
+import org.apache.juddi.v3.client.transport.TransportException;
+import org.uddi.api_v3.*;
+
+import javax.xml.ws.BindingProvider;
 
 public class WebServiceClient {
 
+    private static CatWebService catWebService;
+
     public static void menu() {
+        catWebService = getPort();
+
         Scanner in = new Scanner(System.in);
         Integer decision;
         while (true) {
@@ -18,7 +31,8 @@ public class WebServiceClient {
             System.out.println("2. Прочитать");
             System.out.println("3. Изменить");
             System.out.println("4. Удалить");
-            System.out.println("5. Выйти");
+            System.out.println("5. Бизнес");
+            System.out.println("6. Выйти");
             System.out.println("");
             System.out.print("Выбор: ");
 
@@ -45,6 +59,13 @@ public class WebServiceClient {
                     delete();
                     break;
                 case 5:
+                    try {
+                        bussinessMenu();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 6:
                     return;
                 default:
                     System.out.println("Неверный выбор");
@@ -67,7 +88,7 @@ public class WebServiceClient {
     public static CatWebService getPort() {
         URL url = null;
         try {
-            url = new URL("http://0.0.0.0:8080/app/CatWebService?wsdl");
+            url = new URL("http://0.0.0.0:8090/app/CatWebService?wsdl");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -76,7 +97,6 @@ public class WebServiceClient {
     }
 
     public static void showAll() {
-        CatWebService catWebService = getPort();
         List<Cat> cats = catWebService.getCats();
         printCats(cats);
     }
@@ -102,7 +122,6 @@ public class WebServiceClient {
     }
 
     public static void create() {
-        CatWebService catWebService = getPort();
         System.out.println("Введите информацию о новом коте:");
         String name = readStr("Имя");
         Integer age = readInt("Возраст");
@@ -118,7 +137,6 @@ public class WebServiceClient {
     }
 
     public static void read() {
-        CatWebService catWebService = getPort();
         System.out.println("Уточните запрос:");
         Integer id = readInt("Идентификатор");
         String name = readStr("Имя");
@@ -130,7 +148,6 @@ public class WebServiceClient {
     }
 
     public static void update() {
-        CatWebService catWebService = getPort();
         System.out.println("Уточните запрос:");
         Integer id = readInt("Идентификатор редактируемой записи");
         String name = readStr("Имя");
@@ -145,7 +162,6 @@ public class WebServiceClient {
     }
 
     public static void delete() {
-        CatWebService catWebService = getPort();
         Integer id = readInt("Идентификатор удалямой записи");
         try {
             catWebService.delete(id);
@@ -170,5 +186,139 @@ public class WebServiceClient {
                 "\tbreed = " + c.getBreed() + "\n" +
                 "\tweight = " + c.getWeight() + "\n" +
                 "]";
+    }
+
+    private static JuddiClient juddiClient;
+
+    public static void bussinessMenu() throws RemoteException {
+        Scanner in = new Scanner(System.in);
+
+        String username = readStr("Имя пользователя UDDI");
+        String password = readStr("Пароль");
+
+        juddiClient = null;
+        try {
+            juddiClient = new JuddiClient("META-INF/uddi.xml");
+        } catch (ConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransportException e) {
+            e.printStackTrace();
+            return;
+        }
+        try {
+            juddiClient.authenticate(username, password);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        Integer decision;
+        while (true) {
+            System.out.println("");
+            System.out.println("Выберите пункт:");
+            System.out.println("1. Вывести все бизнесы");
+            System.out.println("2. Зарегистрировать бизнес");
+            System.out.println("3. Зарегистрировать сервис");
+            System.out.println("4. Найти и использовать сервис");
+            System.out.println("5. Выйти");
+            System.out.println("");
+            System.out.print("Выбор: ");
+
+            try {
+                decision = in.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Неверный выбор");
+                continue;
+            }
+            switch (decision) {
+                case 1:
+                    listBusinesses();
+                    break;
+                case 2:
+                    String name = readStr("Имя бизнеса");
+                    createBusiness(name);
+                    break;
+                case 3:
+                    String bbk = readStr("Ключ бизнеса");
+                    String ssn = readStr("Имя сервиса");
+                    String ssurl = readStr("Ссылка на wsdl");
+                    try {
+                        createService(bbk, ssn, ssurl);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 4:
+                    String ffsn = readStr("Поиск по имени");
+                    filterServices(ffsn);
+                    String kkey = readStr("Ключ сервиса");
+                    useService(kkey);
+                    break;
+                case 5:
+                    return;
+                default:
+                    System.out.println("Неверный выбор");
+                    continue;
+            }
+        }
+    }
+
+    private static void listBusinesses() throws RemoteException {
+        JuddiUtil.printBusinessInfo(juddiClient.getBusinessList().getBusinessInfos());
+    }
+
+    public static void createBusiness(String businessName) throws RemoteException {
+        businessName = businessName.trim();
+        BusinessDetail business = juddiClient.createBusiness(businessName);
+        System.out.println("Бизнес создан");
+        for (BusinessEntity businessEntity : business.getBusinessEntity()) {
+            System.out.printf("Ключ: '%s'\n", businessEntity.getBusinessKey());
+            System.out.printf("Имя: '%s'\n", businessEntity.getName().stream().map(Name::getValue).collect(Collectors.joining(" ")));
+        }
+    }
+
+    private static void createService(String businessKey, String serviceName, String wsdlUrl) throws Exception {
+        List<ServiceDetail> serviceDetails = juddiClient.publishUrl(businessKey.trim(), serviceName.trim(), wsdlUrl.trim());
+        System.out.printf("Сервисы, полученные по wsdl: %s\n", wsdlUrl);
+        JuddiUtil.printServicesInfo(serviceDetails.stream()
+                .map(ServiceDetail::getBusinessService)
+                .flatMap(List::stream)
+                .collect(Collectors.toList())
+        );
+    }
+
+    private static void filterServices(String filterArg) throws RemoteException {
+        List<BusinessService> services = juddiClient.getServices(filterArg);
+        JuddiUtil.printServicesInfo(services);
+    }
+
+    public static void changeEndpointUrl(String endpointUrl) {
+        ((BindingProvider) catWebService).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointUrl.trim());
+    }
+
+    private static void useService(String serviceKey) throws RemoteException {
+
+        ServiceDetail serviceDetail = juddiClient.getService(serviceKey.trim());
+        if (serviceDetail == null || serviceDetail.getBusinessService() == null || serviceDetail.getBusinessService().isEmpty()) {
+            System.out.printf("Сервис с ключом '%s' не найден\b", serviceKey);
+            return;
+        }
+        List<BusinessService> services = serviceDetail.getBusinessService();
+        BusinessService businessService = services.get(0);
+        BindingTemplates bindingTemplates = businessService.getBindingTemplates();
+        if (bindingTemplates == null || bindingTemplates.getBindingTemplate().isEmpty()) {
+            System.out.printf("Не найден шаблон для сервиса '%s' '%s'\n", serviceKey, businessService.getBusinessKey());
+            return;
+        }
+        for (BindingTemplate bindingTemplate : bindingTemplates.getBindingTemplate()) {
+            AccessPoint accessPoint = bindingTemplate.getAccessPoint();
+            if (accessPoint.getUseType().equals(AccessPointType.END_POINT.toString())) {
+                String value = accessPoint.getValue();
+                System.out.printf("Применён эндпонт '%s'\n", value);
+                changeEndpointUrl(value);
+                return;
+            }
+        }
+        System.out.printf("No endpoint found for service '%s'\n", serviceKey);
     }
 }
