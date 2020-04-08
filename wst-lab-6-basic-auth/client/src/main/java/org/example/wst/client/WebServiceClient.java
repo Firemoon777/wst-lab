@@ -9,6 +9,7 @@ import org.example.wst.entity.Cat;
 import javax.ws.rs.core.MediaType;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Base64;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -16,6 +17,8 @@ import java.util.Scanner;
 public class WebServiceClient {
 
     private static final String URL = "http://localhost:8080/rest/cats";
+
+    static final String creds = Base64.getEncoder().encodeToString("admin:123456".getBytes());
 
     public static void menu() {
         Scanner in = new Scanner(System.in);
@@ -76,14 +79,19 @@ public class WebServiceClient {
     public static void showAll() {
         Client client = new Client();
         WebResource resource = client.resource(URL);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
+        ClientResponse response = resource
+                .header("Authorization", "Basic " + creds)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(ClientResponse.class);
         if (response.getStatus() != ClientResponse.Status.OK.getStatusCode()) {
             throw new IllegalStateException("Request failed");
         }
         GenericType<List<Cat>> stations = new GenericType<List<Cat>>() {
         };
-
-        List<Cat> cats = resource.accept(MediaType.APPLICATION_JSON).get(stations);
+        List<Cat> cats = resource
+                .header("Authorization", "Basic " + creds)
+                .accept(MediaType.APPLICATION_JSON)
+                .get(stations);
         printCats(cats);
     }
 
@@ -126,6 +134,7 @@ public class WebServiceClient {
         WebResource resource = client.resource(URL);
         try {
             String body = resource.accept(MediaType.TEXT_PLAIN_TYPE, MediaType.APPLICATION_JSON_TYPE)
+                    .header("Authorization", "Basic " + creds)
                     .entity(cat, MediaType.APPLICATION_JSON_TYPE)
                     .post(String.class);
 
@@ -150,14 +159,14 @@ public class WebServiceClient {
         resource = setParamIfNotNull(resource, "age", age);
         resource = setParamIfNotNull(resource, "breed", breed);
         resource = setParamIfNotNull(resource, "weight", weight);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
-        if (response.getStatus() != ClientResponse.Status.OK.getStatusCode()) {
-            throw new IllegalStateException("Request failed");
-        }
+
         GenericType<List<Cat>> stations = new GenericType<List<Cat>>() {
         };
 
-        List<Cat> cats = resource.accept(MediaType.APPLICATION_JSON).get(stations);
+        List<Cat> cats = resource
+                .header("Authorization", "Basic " + creds)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(stations);;
         printCats(cats);
     }
 
@@ -175,6 +184,7 @@ public class WebServiceClient {
         String updateResponse = resource.path(String.valueOf(id))
                 .entity(cat, MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.TEXT_PLAIN_TYPE)
+                .header("Authorization", "Basic " + creds)
                 .put(String.class);
         System.out.println(updateResponse);
     }
@@ -184,7 +194,9 @@ public class WebServiceClient {
         Integer id = readInt("Идентификатор");
         Client client = new Client();
         WebResource resource = client.resource(URL);
-        String body = resource.path(String.valueOf(id)).accept(MediaType.TEXT_PLAIN_TYPE).delete(String.class);
+        String body = resource.path(String.valueOf(id))
+                .header("Authorization", "Basic " + creds)
+                .accept(MediaType.TEXT_PLAIN_TYPE).delete(String.class);
         System.out.println(body);
     }
 
