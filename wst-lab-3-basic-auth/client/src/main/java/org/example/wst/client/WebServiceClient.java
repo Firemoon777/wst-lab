@@ -1,10 +1,10 @@
 package org.example.wst.client;
 
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.handler.MessageContext;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class WebServiceClient {
 
@@ -72,12 +72,30 @@ public class WebServiceClient {
             e.printStackTrace();
         }
         CatWebService_Service CatWebService = new CatWebService_Service(url);
-        return CatWebService.getCatWebServicePort();
+        CatWebService result = CatWebService.getCatWebServicePort();
+
+        Map<String, Object> req_ctx = ((BindingProvider)result).getRequestContext();
+        req_ctx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url.toString());
+
+        Map<String, List<String>> headers = new HashMap<>();
+
+        String creds = "admin:123456";
+        String base64 = Base64.getEncoder().encodeToString(creds.getBytes());
+        headers.put("Authorization",  Collections.singletonList("Basic " + base64));
+        req_ctx.put(MessageContext.HTTP_REQUEST_HEADERS, headers);
+
+        return result;
     }
 
     public static void showAll() {
         CatWebService catWebService = getPort();
-        List<Cat> cats = catWebService.getCats();
+        List<Cat> cats = null;
+        try {
+            cats = catWebService.getCats();
+        } catch (CatException e) {
+            System.out.println("Ошибка чтения: " + e.getMessage());
+            return;
+        }
         printCats(cats);
     }
 
@@ -89,6 +107,7 @@ public class WebServiceClient {
             return null;
         }
         return Integer.valueOf(line);
+
     }
 
     public static String readStr(String prompt) {
@@ -125,7 +144,13 @@ public class WebServiceClient {
         Integer age = readInt("Возраст");
         String breed = readStr("Порода");
         Integer weight = readInt("Вес");
-        List<Cat> cats = catWebService.read(id, name, age, breed, weight);
+        List<Cat> cats = null;
+        try {
+            cats = catWebService.read(id, name, age, breed, weight);
+        } catch (CatException e) {
+            System.out.println("Ошибка чтения: " + e.getMessage());
+            return;
+        }
         printCats(cats);
     }
 
