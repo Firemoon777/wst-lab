@@ -17,6 +17,7 @@ public class App {
         HttpServer server = null;
         try {
             ResourceConfig resourceConfig = new PackagesResourceConfig(CatResource.class.getPackage().getName());
+            resourceConfig.getSingletons().add(new CatResource());
             server = GrizzlyServerFactory.createHttpServer(BASE_URI, resourceConfig);
             server.start();
             System.in.read();
